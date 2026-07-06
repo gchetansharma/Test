@@ -27,6 +27,13 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>2.15.2</version>
         </dependency>
+        <!-- JUnit for testing -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

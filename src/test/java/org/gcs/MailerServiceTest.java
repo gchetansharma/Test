@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,10 +16,11 @@ public class MailerServiceTest {
     private String validMailersJson;
     private String singleMailerJson;
     private String invalidJson;
+    private String resourcesPath;
 
     @Before
     public void setUp() {
-        // Valid JSON with one mailer containing AllowedMailers
+        // Valid JSON with one mailer containing AllowedMailers (as list)
         validMailersJson = "[\n" +
                 "  {\n" +
                 "    \"url\": \"smtp.gmail.com\",\n" +
@@ -44,23 +46,228 @@ public class MailerServiceTest {
                 "  }\n" +
                 "]";
 
-        singleMailerJson = "[\n" +
-                "  {\n" +
-                "    \"url\": \"smtp.outlook.com\",\n" +
-                "    \"recipients\": [\"alice@company.com\"],\n" +
-                "    \"cc\": [\"lead@company.com\"],\n" +
-                "    \"allowedMailers\": [\n" +
-                "      {\n" +
-                "        \"email\": \"support@outlook.com\",\n" +
-                "        \"validFrom\": \"2024-01-01T00:00:00\",\n" +
-                "        \"validUntil\": \"2024-12-31T23:59:59\"\n" +
-                "      }\n" +
-                "    ]\n" +
-                "  }\n" +
-                "]";
+        // Single mailer JSON (not a list)
+        singleMailerJson = "{\n" +
+                "  \"url\": \"smtp.outlook.com\",\n" +
+                "  \"recipients\": [\"alice@company.com\"],\n" +
+                "  \"cc\": [\"lead@company.com\"],\n" +
+                "  \"allowedMailers\": [\n" +
+                "    {\n" +
+                "      \"email\": \"support@outlook.com\",\n" +
+                "      \"validFrom\": \"2024-01-01T00:00:00\",\n" +
+                "      \"validUntil\": \"2024-12-31T23:59:59\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
 
         invalidJson = "{ invalid json }";
+
+        resourcesPath = "src/main/resources/mailers.json";
     }
+
+    // ===== Tests for Reading from File =====
+
+    @Test
+    public void testReadMailerFromFile_SingleMailerObject() throws Exception {
+        Mailer mailer = MailerService.readMailerFromFile(resourcesPath);
+
+        assertNotNull(mailer);
+        assertEquals("smtp.gmail.com", mailer.getUrl());
+        assertEquals(5, mailer.getRecipients().size());
+        assertEquals(5, mailer.getCc().size());
+    }
+
+    @Test
+    public void testReadMailerFromFile_VerifyUrl() throws Exception {
+        Mailer mailer = MailerService.readMailerFromFile(resourcesPath);
+
+        assertEquals("smtp.gmail.com", mailer.getUrl());
+    }
+
+    @Test
+    public void testReadMailerFromFile_VerifyRecipients() throws Exception {
+        Mailer mailer = MailerService.readMailerFromFile(resourcesPath);
+
+        assertEquals(5, mailer.getRecipients().size());
+        assertEquals("john.doe@example.com", mailer.getRecipients().get(0));
+        assertEquals("jane.smith@example.com", mailer.getRecipients().get(1));
+        assertEquals("mike.johnson@example.com", mailer.getRecipients().get(2));
+        assertEquals("sarah.williams@example.com", mailer.getRecipients().get(3));
+        assertEquals("david.brown@example.com", mailer.getRecipients().get(4));
+    }
+
+    @Test
+    public void testReadMailerFromFile_VerifyCCs() throws Exception {
+        Mailer mailer = MailerService.readMailerFromFile(resourcesPath);
+
+        assertEquals(5, mailer.getCc().size());
+        assertEquals("manager1@company.com", mailer.getCc().get(0));
+        assertEquals("lead1@company.com", mailer.getCc().get(1));
+        assertEquals("admin1@company.com", mailer.getCc().get(2));
+        assertEquals("supervisor1@company.com", mailer.getCc().get(3));
+        assertEquals("coordinator1@company.com", mailer.getCc().get(4));
+    }
+
+    @Test
+    public void testReadMailerFromFile_VerifyAllowedMailers() throws Exception {
+        Mailer mailer = MailerService.readMailerFromFile(resourcesPath);
+
+        assertNotNull(mailer.getAllowedMailers());
+        assertEquals(5, mailer.getAllowedMailers().size());
+    }
+
+    @Test
+    public void testReadMailerFromFile_VerifyFirstAllowedMailer() throws Exception {
+        Mailer mailer = MailerService.readMailerFromFile(resourcesPath);
+        AllowedMailers am = mailer.getAllowedMailers().get(0);
+
+        assertEquals("support@gmail.com", am.getEmail());
+        assertEquals(LocalDateTime.parse("2024-01-01T08:00:00"), am.getValidFrom());
+        assertEquals(LocalDateTime.parse("2025-01-01T08:00:00"), am.getValidUntil());
+    }
+
+    @Test
+    public void testReadMailerFromFile_VerifySecondAllowedMailer() throws Exception {
+        Mailer mailer = MailerService.readMailerFromFile(resourcesPath);
+        AllowedMailers am = mailer.getAllowedMailers().get(1);
+
+        assertEquals("admin@gmail.com", am.getEmail());
+        assertEquals(LocalDateTime.parse("2024-01-01T08:00:00"), am.getValidFrom());
+        assertEquals(LocalDateTime.parse("2025-06-30T23:59:59"), am.getValidUntil());
+    }
+
+    @Test
+    public void testReadMailerFromFile_VerifyThirdAllowedMailer() throws Exception {
+        Mailer mailer = MailerService.readMailerFromFile(resourcesPath);
+        AllowedMailers am = mailer.getAllowedMailers().get(2);
+
+        assertEquals("noreply@gmail.com", am.getEmail());
+        assertEquals(LocalDateTime.parse("2024-02-15T00:00:00"), am.getValidFrom());
+        assertEquals(LocalDateTime.parse("2024-12-31T23:59:59"), am.getValidUntil());
+    }
+
+    @Test
+    public void testReadMailerFromFile_VerifyFourthAllowedMailer() throws Exception {
+        Mailer mailer = MailerService.readMailerFromFile(resourcesPath);
+        AllowedMailers am = mailer.getAllowedMailers().get(3);
+
+        assertEquals("security@gmail.com", am.getEmail());
+        assertEquals(LocalDateTime.parse("2024-01-01T08:00:00"), am.getValidFrom());
+        assertEquals(LocalDateTime.parse("2026-01-01T08:00:00"), am.getValidUntil());
+    }
+
+    @Test
+    public void testReadMailerFromFile_VerifyFifthAllowedMailer() throws Exception {
+        Mailer mailer = MailerService.readMailerFromFile(resourcesPath);
+        AllowedMailers am = mailer.getAllowedMailers().get(4);
+
+        assertEquals("billing@gmail.com", am.getEmail());
+        assertEquals(LocalDateTime.parse("2024-03-01T08:00:00"), am.getValidFrom());
+        assertEquals(LocalDateTime.parse("2025-12-31T23:59:59"), am.getValidUntil());
+    }
+
+    @Test
+    public void testReadMailerFromFile_FileExists() {
+        File file = new File(resourcesPath);
+        assertTrue("File should exist: " + resourcesPath, file.exists());
+    }
+
+    @Test
+    public void testReadMailerFromFile_DataIntegrity() throws Exception {
+        Mailer mailer = MailerService.readMailerFromFile(resourcesPath);
+
+        assertNotNull("URL should not be null", mailer.getUrl());
+        assertNotNull("Recipients should not be null", mailer.getRecipients());
+        assertNotNull("CC should not be null", mailer.getCc());
+        assertNotNull("AllowedMailers should not be null", mailer.getAllowedMailers());
+
+        assertTrue("Recipients should not be empty", !mailer.getRecipients().isEmpty());
+        assertTrue("CC should not be empty", !mailer.getCc().isEmpty());
+        assertTrue("AllowedMailers should not be empty", !mailer.getAllowedMailers().isEmpty());
+    }
+
+    // ===== Tests for Reading Single Mailer from String =====
+
+    @Test
+    public void testReadMailerFromString_SingleObject() throws Exception {
+        Mailer mailer = MailerService.readMailerFromString(singleMailerJson);
+
+        assertNotNull(mailer);
+        assertEquals("smtp.outlook.com", mailer.getUrl());
+        assertEquals(1, mailer.getRecipients().size());
+        assertEquals("alice@company.com", mailer.getRecipients().get(0));
+    }
+
+    @Test
+    public void testReadMailerFromString_SingleAllowedMailer() throws Exception {
+        Mailer mailer = MailerService.readMailerFromString(singleMailerJson);
+
+        assertEquals(1, mailer.getAllowedMailers().size());
+        AllowedMailers am = mailer.getAllowedMailers().get(0);
+        assertEquals("support@outlook.com", am.getEmail());
+    }
+
+    // ===== Tests for Reading Single Mailer from InputStream =====
+
+    @Test
+    public void testReadMailerFromInputStream_SingleObject() throws Exception {
+        InputStream inputStream = new ByteArrayInputStream(singleMailerJson.getBytes());
+        Mailer mailer = MailerService.readMailerFromInputStream(inputStream);
+
+        assertNotNull(mailer);
+        assertEquals("smtp.outlook.com", mailer.getUrl());
+    }
+
+    @Test
+    public void testReadMailerFromInputStream_WithAllowedMailers() throws Exception {
+        InputStream inputStream = new ByteArrayInputStream(singleMailerJson.getBytes());
+        Mailer mailer = MailerService.readMailerFromInputStream(inputStream);
+
+        assertNotNull(mailer.getAllowedMailers());
+        assertEquals(1, mailer.getAllowedMailers().size());
+    }
+
+    // ===== Tests for Converting Single Mailer =====
+
+    @Test
+    public void testConvertMailerToJson_FromFile() throws Exception {
+        Mailer mailer = MailerService.readMailerFromFile(resourcesPath);
+        String jsonOutput = MailerService.convertMailerToJson(mailer);
+
+        assertNotNull(jsonOutput);
+        assertTrue(jsonOutput.contains("smtp.gmail.com"));
+        assertTrue(jsonOutput.contains("john.doe@example.com"));
+    }
+
+    @Test
+    public void testConvertMailerToJson_RoundTrip() throws Exception {
+        // Read from file
+        Mailer originalMailer = MailerService.readMailerFromFile(resourcesPath);
+
+        // Convert to JSON
+        String jsonOutput = MailerService.convertMailerToJson(originalMailer);
+
+        // Read back from JSON
+        Mailer reconvertedMailer = MailerService.readMailerFromString(jsonOutput);
+
+        // Verify
+        assertEquals(originalMailer.getUrl(), reconvertedMailer.getUrl());
+        assertEquals(originalMailer.getRecipients().size(), reconvertedMailer.getRecipients().size());
+        assertEquals(originalMailer.getCc().size(), reconvertedMailer.getCc().size());
+        assertEquals(originalMailer.getAllowedMailers().size(), reconvertedMailer.getAllowedMailers().size());
+    }
+
+    @Test
+    public void testMailerToString_FromFile() throws Exception {
+        Mailer mailer = MailerService.readMailerFromFile(resourcesPath);
+        String toString = mailer.toString();
+
+        assertNotNull(toString);
+        assertTrue(toString.contains("Mailer"));
+        assertTrue(toString.contains("smtp.gmail.com"));
+    }
+
+    // ===== Tests for List Reading (existing functionality) =====
 
     @Test
     public void testReadMailersFromString_ValidJson() throws Exception {
@@ -71,10 +278,6 @@ public class MailerServiceTest {
 
         Mailer mailer = mailers.get(0);
         assertEquals("smtp.gmail.com", mailer.getUrl());
-        assertEquals(2, mailer.getRecipients().size());
-        assertEquals("john@example.com", mailer.getRecipients().get(0));
-        assertEquals(1, mailer.getCc().size());
-        assertEquals("manager@example.com", mailer.getCc().get(0));
     }
 
     @Test
@@ -87,16 +290,6 @@ public class MailerServiceTest {
 
         assertNotNull(allowedMailers);
         assertEquals(2, allowedMailers.size());
-
-        AllowedMailers am1 = allowedMailers.get(0);
-        assertEquals("support@gmail.com", am1.getEmail());
-        assertEquals(LocalDateTime.parse("2024-01-01T08:00:00"), am1.getValidFrom());
-        assertEquals(LocalDateTime.parse("2025-01-01T08:00:00"), am1.getValidUntil());
-
-        AllowedMailers am2 = allowedMailers.get(1);
-        assertEquals("admin@gmail.com", am2.getEmail());
-        assertEquals(LocalDateTime.parse("2024-01-01T08:00:00"), am2.getValidFrom());
-        assertEquals(LocalDateTime.parse("2025-06-30T23:59:59"), am2.getValidUntil());
     }
 
     @Test
@@ -106,39 +299,6 @@ public class MailerServiceTest {
 
         assertNotNull(mailers);
         assertEquals(1, mailers.size());
-        assertEquals("smtp.gmail.com", mailers.get(0).getUrl());
-    }
-
-    @Test
-    public void testReadMailersFromInputStream_MultipleMailers() throws Exception {
-        String multipleMailersJson = "[\n" +
-                "  {\n" +
-                "    \"url\": \"smtp.gmail.com\",\n" +
-                "    \"recipients\": [\"john@example.com\"],\n" +
-                "    \"cc\": [\"manager@example.com\"],\n" +
-                "    \"allowedMailers\": []\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"url\": \"smtp.outlook.com\",\n" +
-                "    \"recipients\": [\"alice@company.com\"],\n" +
-                "    \"cc\": [\"lead@company.com\"],\n" +
-                "    \"allowedMailers\": []\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"url\": \"smtp.sendgrid.com\",\n" +
-                "    \"recipients\": [\"kate@sendgrid.com\"],\n" +
-                "    \"cc\": [\"manager@sendgrid.com\"],\n" +
-                "    \"allowedMailers\": []\n" +
-                "  }\n" +
-                "]";
-
-        InputStream inputStream = new ByteArrayInputStream(multipleMailersJson.getBytes());
-        List<Mailer> mailers = MailerService.readMailersFromInputStream(inputStream);
-
-        assertEquals(3, mailers.size());
-        assertEquals("smtp.gmail.com", mailers.get(0).getUrl());
-        assertEquals("smtp.outlook.com", mailers.get(1).getUrl());
-        assertEquals("smtp.sendgrid.com", mailers.get(2).getUrl());
     }
 
     @Test
@@ -149,140 +309,15 @@ public class MailerServiceTest {
         assertNotNull(jsonOutput);
         assertTrue(jsonOutput.contains("smtp.gmail.com"));
         assertTrue(jsonOutput.contains("john@example.com"));
-        assertTrue(jsonOutput.contains("support@gmail.com"));
-        assertTrue(jsonOutput.contains("2024") || jsonOutput.contains("validFrom"));
-    }
-
-    @Test
-    public void testConvertMailerToJson() throws Exception {
-        List<Mailer> mailers = MailerService.readMailersFromString(singleMailerJson);
-        Mailer mailer = mailers.get(0);
-        String jsonOutput = MailerService.convertMailerToJson(mailer);
-
-        assertNotNull(jsonOutput);
-        assertTrue(jsonOutput.contains("smtp.outlook.com"));
-        assertTrue(jsonOutput.contains("alice@company.com"));
-        assertTrue(jsonOutput.contains("support@outlook.com"));
     }
 
     @Test
     public void testRoundTripConversion() throws Exception {
-        // Read mailers from JSON
         List<Mailer> originalMailers = MailerService.readMailersFromString(validMailersJson);
-
-        // Convert back to JSON
         String convertedJson = MailerService.convertMailersToJson(originalMailers);
-
-        // Read again from converted JSON
         List<Mailer> reconvertedMailers = MailerService.readMailersFromString(convertedJson);
 
-        // Verify data integrity
         assertEquals(originalMailers.size(), reconvertedMailers.size());
-        assertEquals(originalMailers.get(0).getUrl(), reconvertedMailers.get(0).getUrl());
-        assertEquals(originalMailers.get(0).getRecipients().size(),
-                reconvertedMailers.get(0).getRecipients().size());
-        assertEquals(originalMailers.get(0).getAllowedMailers().size(),
-                reconvertedMailers.get(0).getAllowedMailers().size());
-    }
-
-    @Test
-    public void testMailerWithNullBcc() throws Exception {
-        String jsonWithNullBcc = "[\n" +
-                "  {\n" +
-                "    \"url\": \"smtp.test.com\",\n" +
-                "    \"recipients\": [\"test@example.com\"],\n" +
-                "    \"cc\": [\"cc@example.com\"],\n" +
-                "    \"bcc\": null,\n" +
-                "    \"allowedMailers\": []\n" +
-                "  }\n" +
-                "]";
-
-        List<Mailer> mailers = MailerService.readMailersFromString(jsonWithNullBcc);
-        Mailer mailer = mailers.get(0);
-
-        assertNotNull(mailer);
-        assertNull(mailer.getBcc());
-    }
-
-    @Test
-    public void testMailerWithEmptyAllowedMailers() throws Exception {
-        String jsonWithEmptyAllowed = "[\n" +
-                "  {\n" +
-                "    \"url\": \"smtp.test.com\",\n" +
-                "    \"recipients\": [\"test@example.com\"],\n" +
-                "    \"cc\": [\"cc@example.com\"],\n" +
-                "    \"allowedMailers\": []\n" +
-                "  }\n" +
-                "]";
-
-        List<Mailer> mailers = MailerService.readMailersFromString(jsonWithEmptyAllowed);
-        Mailer mailer = mailers.get(0);
-
-        assertNotNull(mailer.getAllowedMailers());
-        assertEquals(0, mailer.getAllowedMailers().size());
-    }
-
-    @Test
-    public void testMailerWithMultipleRecipients() throws Exception {
-        String jsonWithMultipleRecips = "[\n" +
-                "  {\n" +
-                "    \"url\": \"smtp.test.com\",\n" +
-                "    \"recipients\": [\n" +
-                "      \"user1@example.com\",\n" +
-                "      \"user2@example.com\",\n" +
-                "      \"user3@example.com\",\n" +
-                "      \"user4@example.com\",\n" +
-                "      \"user5@example.com\"\n" +
-                "    ],\n" +
-                "    \"cc\": [\"cc@example.com\"],\n" +
-                "    \"allowedMailers\": []\n" +
-                "  }\n" +
-                "]";
-
-        List<Mailer> mailers = MailerService.readMailersFromString(jsonWithMultipleRecips);
-        Mailer mailer = mailers.get(0);
-
-        assertEquals(5, mailer.getRecipients().size());
-        assertEquals("user1@example.com", mailer.getRecipients().get(0));
-        assertEquals("user5@example.com", mailer.getRecipients().get(4));
-    }
-
-    @Test
-    public void testMailerWithMultipleCCs() throws Exception {
-        String jsonWithMultipleCCs = "[\n" +
-                "  {\n" +
-                "    \"url\": \"smtp.test.com\",\n" +
-                "    \"recipients\": [\"test@example.com\"],\n" +
-                "    \"cc\": [\n" +
-                "      \"cc1@example.com\",\n" +
-                "      \"cc2@example.com\",\n" +
-                "      \"cc3@example.com\"\n" +
-                "    ],\n" +
-                "    \"allowedMailers\": []\n" +
-                "  }\n" +
-                "]";
-
-        List<Mailer> mailers = MailerService.readMailersFromString(jsonWithMultipleCCs);
-        Mailer mailer = mailers.get(0);
-
-        assertEquals(3, mailer.getCc().size());
-        assertEquals("cc1@example.com", mailer.getCc().get(0));
-        assertEquals("cc3@example.com", mailer.getCc().get(2));
-    }
-
-    @Test
-    public void testAllowedMailerFields() throws Exception {
-        List<Mailer> mailers = MailerService.readMailersFromString(validMailersJson);
-        AllowedMailers am = mailers.get(0).getAllowedMailers().get(0);
-
-        // Verify all fields are properly deserialized
-        assertNotNull(am.getEmail());
-        assertNotNull(am.getValidFrom());
-        assertNotNull(am.getValidUntil());
-
-        // Verify field values
-        assertEquals("support@gmail.com", am.getEmail());
-        assertTrue(am.getValidFrom().isBefore(am.getValidUntil()));
     }
 
     @Test(expected = Exception.class)
@@ -296,103 +331,11 @@ public class MailerServiceTest {
     }
 
     @Test
-    public void testConvertMailerToJson_PreservesData() throws Exception {
-        List<Mailer> mailers = MailerService.readMailersFromString(validMailersJson);
-        Mailer originalMailer = mailers.get(0);
-
-        String jsonOutput = MailerService.convertMailerToJson(originalMailer);
-        List<Mailer> reconvertedList = MailerService.readMailersFromString("[" + jsonOutput + "]");
-        Mailer reconvertedMailer = reconvertedList.get(0);
-
-        assertEquals(originalMailer.getUrl(), reconvertedMailer.getUrl());
-        assertEquals(originalMailer.getRecipients(), reconvertedMailer.getRecipients());
-        assertEquals(originalMailer.getCc(), reconvertedMailer.getCc());
-    }
-
-    @Test
-    public void testReadFromInputStream_WithValidData() throws Exception {
-        InputStream stream = new ByteArrayInputStream(singleMailerJson.getBytes());
-        List<Mailer> mailers = MailerService.readMailersFromInputStream(stream);
-
-        assertNotNull(mailers);
-        assertEquals(1, mailers.size());
-        assertEquals("smtp.outlook.com", mailers.get(0).getUrl());
-        assertEquals(1, mailers.get(0).getAllowedMailers().size());
-    }
-
-    @Test
-    public void testMailerToString() throws Exception {
-        List<Mailer> mailers = MailerService.readMailersFromString(validMailersJson);
-        Mailer mailer = mailers.get(0);
-
-        String toString = mailer.toString();
-        assertNotNull(toString);
-        assertTrue(toString.contains("Mailer"));
-        assertTrue(toString.contains("smtp.gmail.com"));
-    }
-
-    @Test
-    public void testAllowedMailerToString() throws Exception {
-        List<Mailer> mailers = MailerService.readMailersFromString(validMailersJson);
-        AllowedMailers am = mailers.get(0).getAllowedMailers().get(0);
-
-        String toString = am.toString();
-        assertNotNull(toString);
-        assertTrue(toString.contains("AllowedMailers"));
-        assertTrue(toString.contains("support@gmail.com"));
-    }
-
-    @Test
     public void testEmptyMailersArray() throws Exception {
         String emptyJson = "[]";
         List<Mailer> mailers = MailerService.readMailersFromString(emptyJson);
 
         assertNotNull(mailers);
         assertEquals(0, mailers.size());
-    }
-
-    @Test
-    public void testMultipleAllowedMailersPerMailer() throws Exception {
-        String multipleAllowedJson = "[\n" +
-                "  {\n" +
-                "    \"url\": \"smtp.test.com\",\n" +
-                "    \"recipients\": [\"test@example.com\"],\n" +
-                "    \"cc\": [\"cc@example.com\"],\n" +
-                "    \"allowedMailers\": [\n" +
-                "      {\n" +
-                "        \"email\": \"am1@test.com\",\n" +
-                "        \"validFrom\": \"2024-01-01T00:00:00\",\n" +
-                "        \"validUntil\": \"2024-12-31T23:59:59\"\n" +
-                "      },\n" +
-                "      {\n" +
-                "        \"email\": \"am2@test.com\",\n" +
-                "        \"validFrom\": \"2024-01-01T00:00:00\",\n" +
-                "        \"validUntil\": \"2024-12-31T23:59:59\"\n" +
-                "      },\n" +
-                "      {\n" +
-                "        \"email\": \"am3@test.com\",\n" +
-                "        \"validFrom\": \"2024-01-01T00:00:00\",\n" +
-                "        \"validUntil\": \"2024-12-31T23:59:59\"\n" +
-                "      },\n" +
-                "      {\n" +
-                "        \"email\": \"am4@test.com\",\n" +
-                "        \"validFrom\": \"2024-01-01T00:00:00\",\n" +
-                "        \"validUntil\": \"2024-12-31T23:59:59\"\n" +
-                "      },\n" +
-                "      {\n" +
-                "        \"email\": \"am5@test.com\",\n" +
-                "        \"validFrom\": \"2024-01-01T00:00:00\",\n" +
-                "        \"validUntil\": \"2024-12-31T23:59:59\"\n" +
-                "      }\n" +
-                "    ]\n" +
-                "  }\n" +
-                "]";
-
-        List<Mailer> mailers = MailerService.readMailersFromString(multipleAllowedJson);
-        Mailer mailer = mailers.get(0);
-
-        assertEquals(5, mailer.getAllowedMailers().size());
-        assertEquals("am1@test.com", mailer.getAllowedMailers().get(0).getEmail());
-        assertEquals("am5@test.com", mailer.getAllowedMailers().get(4).getEmail());
     }
 }

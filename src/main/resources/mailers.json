@@ -1,222 +1,44 @@
-[
-  {
-    "url": "smtp.gmail.com",
-    "recipients": [
-      "john.doe@example.com",
-      "jane.smith@example.com",
-      "mike.johnson@example.com",
-      "sarah.williams@example.com",
-      "david.brown@example.com"
-    ],
-    "cc": [
-      "manager1@company.com",
-      "lead1@company.com",
-      "admin1@company.com",
-      "supervisor1@company.com",
-      "coordinator1@company.com"
-    ],
-    "allowedMailers": [
-      {
-        "email": "support@gmail.com",
-        "validFrom": "2024-01-01T08:00:00",
-        "validUntil": "2025-01-01T08:00:00"
-      },
-      {
-        "email": "admin@gmail.com",
-        "validFrom": "2024-01-01T08:00:00",
-        "validUntil": "2025-06-30T23:59:59"
-      },
-      {
-        "email": "noreply@gmail.com",
-        "validFrom": "2024-02-15T00:00:00",
-        "validUntil": "2024-12-31T23:59:59"
-      },
-      {
-        "email": "security@gmail.com",
-        "validFrom": "2024-01-01T08:00:00",
-        "validUntil": "2026-01-01T08:00:00"
-      },
-      {
-        "email": "billing@gmail.com",
-        "validFrom": "2024-03-01T08:00:00",
-        "validUntil": "2025-12-31T23:59:59"
-      }
-    ]
-  },
-  {
-    "url": "smtp.outlook.com",
-    "recipients": [
-      "alice.taylor@company.com",
-      "bob.anderson@company.com",
-      "carol.martin@company.com",
-      "diana.thomas@company.com",
-      "evan.jackson@company.com"
-    ],
-    "cc": [
-      "manager2@company.com",
-      "lead2@company.com",
-      "admin2@company.com",
-      "supervisor2@company.com",
-      "coordinator2@company.com"
-    ],
-    "allowedMailers": [
-      {
-        "email": "support@outlook.com",
-        "validFrom": "2024-01-01T08:00:00",
-        "validUntil": "2025-01-01T08:00:00"
-      },
-      {
-        "email": "admin@outlook.com",
-        "validFrom": "2024-01-01T08:00:00",
-        "validUntil": "2025-06-30T23:59:59"
-      },
-      {
-        "email": "noreply@outlook.com",
-        "validFrom": "2024-02-15T00:00:00",
-        "validUntil": "2024-12-31T23:59:59"
-      },
-      {
-        "email": "security@outlook.com",
-        "validFrom": "2024-01-01T08:00:00",
-        "validUntil": "2026-01-01T08:00:00"
-      },
-      {
-        "email": "billing@outlook.com",
-        "validFrom": "2024-03-01T08:00:00",
-        "validUntil": "2025-12-31T23:59:59"
-      }
-    ]
-  },
-  {
-    "url": "smtp.company-internal.com",
-    "recipients": [
-      "frank.white@internal.com",
-      "grace.harris@internal.com",
-      "henry.clark@internal.com",
-      "iris.lewis@internal.com",
-      "jack.walker@internal.com"
-    ],
-    "cc": [
-      "manager3@internal.com",
-      "lead3@internal.com",
-      "admin3@internal.com",
-      "supervisor3@internal.com",
-      "coordinator3@internal.com"
-    ],
-    "allowedMailers": [
-      {
-        "email": "support@internal.com",
-        "validFrom": "2024-01-01T08:00:00",
-        "validUntil": "2025-01-01T08:00:00"
-      },
-      {
-        "email": "admin@internal.com",
-        "validFrom": "2024-01-01T08:00:00",
-        "validUntil": "2025-06-30T23:59:59"
-      },
-      {
-        "email": "noreply@internal.com",
-        "validFrom": "2024-01-15T00:00:00",
-        "validUntil": "2025-01-15T23:59:59"
-      },
-      {
-        "email": "hr@internal.com",
-        "validFrom": "2024-01-01T08:00:00",
-        "validUntil": "2026-01-01T08:00:00"
-      },
-      {
-        "email": "it@internal.com",
-        "validFrom": "2024-01-01T08:00:00",
-        "validUntil": "2026-01-01T08:00:00"
-      }
-    ]
-  },
-  {
-    "url": "smtp.sendgrid.com",
-    "recipients": [
-      "kate.hall@sendgrid.com",
-      "liam.young@sendgrid.com",
-      "mia.hernandez@sendgrid.com",
-      "noah.king@sendgrid.com",
-      "olivia.lopez@sendgrid.com"
-    ],
-    "cc": [
-      "manager4@sendgrid.com",
-      "lead4@sendgrid.com",
-      "admin4@sendgrid.com",
-      "supervisor4@sendgrid.com",
-      "coordinator4@sendgrid.com"
-    ],
-    "allowedMailers": [
-      {
-        "email": "support@sendgrid.com",
-        "validFrom": "2024-01-01T08:00:00",
-        "validUntil": "2025-01-01T08:00:00"
-      },
-      {
-        "email": "admin@sendgrid.com",
-        "validFrom": "2024-01-01T08:00:00",
-        "validUntil": "2025-06-30T23:59:59"
-      },
-      {
-        "email": "noreply@sendgrid.com",
-        "validFrom": "2024-02-15T00:00:00",
-        "validUntil": "2024-12-31T23:59:59"
-      },
-      {
-        "email": "alerts@sendgrid.com",
-        "validFrom": "2024-01-01T08:00:00",
-        "validUntil": "2026-01-01T08:00:00"
-      },
-      {
-        "email": "api@sendgrid.com",
-        "validFrom": "2024-01-01T08:00:00",
-        "validUntil": "2026-01-01T08:00:00"
-      }
-    ]
-  },
-  {
-    "url": "smtp.aws-ses.com",
-    "recipients": [
-      "paul.scott@aws.com",
-      "quinn.green@aws.com",
-      "rachel.adams@aws.com",
-      "stephen.nelson@aws.com",
-      "tina.carter@aws.com"
-    ],
-    "cc": [
-      "manager5@aws.com",
-      "lead5@aws.com",
-      "admin5@aws.com",
-      "supervisor5@aws.com",
-      "coordinator5@aws.com"
-    ],
-    "allowedMailers": [
-      {
-        "email": "support@ses.aws.com",
-        "validFrom": "2024-01-01T08:00:00",
-        "validUntil": "2025-01-01T08:00:00"
-      },
-      {
-        "email": "admin@ses.aws.com",
-        "validFrom": "2024-01-01T08:00:00",
-        "validUntil": "2025-06-30T23:59:59"
-      },
-      {
-        "email": "noreply@ses.aws.com",
-        "validFrom": "2024-02-15T00:00:00",
-        "validUntil": "2024-12-31T23:59:59"
-      },
-      {
-        "email": "notifications@ses.aws.com",
-        "validFrom": "2024-01-01T08:00:00",
-        "validUntil": "2026-01-01T08:00:00"
-      },
-      {
-        "email": "verification@ses.aws.com",
-        "validFrom": "2024-01-01T08:00:00",
-        "validUntil": "2026-01-01T08:00:00"
-      }
-    ]
-  }
-]
+{
+  "url": "smtp.gmail.com",
+  "recipients": [
+    "john.doe@example.com",
+    "jane.smith@example.com",
+    "mike.johnson@example.com",
+    "sarah.williams@example.com",
+    "david.brown@example.com"
+  ],
+  "cc": [
+    "manager1@company.com",
+    "lead1@company.com",
+    "admin1@company.com",
+    "supervisor1@company.com",
+    "coordinator1@company.com"
+  ],
+  "allowedMailers": [
+    {
+      "email": "support@gmail.com",
+      "validFrom": "2024-01-01T08:00:00",
+      "validUntil": "2025-01-01T08:00:00"
+    },
+    {
+      "email": "admin@gmail.com",
+      "validFrom": "2024-01-01T08:00:00",
+      "validUntil": "2025-06-30T23:59:59"
+    },
+    {
+      "email": "noreply@gmail.com",
+      "validFrom": "2024-02-15T00:00:00",
+      "validUntil": "2024-12-31T23:59:59"
+    },
+    {
+      "email": "security@gmail.com",
+      "validFrom": "2024-01-01T08:00:00",
+      "validUntil": "2026-01-01T08:00:00"
+    },
+    {
+      "email": "billing@gmail.com",
+      "validFrom": "2024-03-01T08:00:00",
+      "validUntil": "2025-12-31T23:59:59"
+    }
+  ]
+}
